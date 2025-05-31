@@ -1,6 +1,20 @@
 <?php
 require 'functions.php';
 require 'cek.php';
+
+$query_total_products = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM barang");
+$total_products = mysqli_fetch_array($query_total_products)['total'];
+
+$query_total_users = mysqli_query($koneksi, "SELECT COUNT(*) as total FROM pengguna");
+$total_users = mysqli_fetch_array($query_total_users)['total'];
+
+$query_total_stock_in = mysqli_query($koneksi, "SELECT SUM(total_harga) as total FROM detail_faktur_masuk");
+$total_stock_in = mysqli_fetch_array($query_total_stock_in)['total'] ?? 0;
+
+$query_total_stock_out = mysqli_query($koneksi, "SELECT SUM(total_harga) as total FROM detail_faktur_keluar");
+$total_stock_out = mysqli_fetch_array($query_total_stock_out)['total'] ?? 0;
+
+$query_low_stock = mysqli_query($koneksi, "SELECT * FROM barang WHERE stok < 10 ORDER BY stok ASC LIMIT 5");
 ?>
 
 <!DOCTYPE html>
@@ -14,7 +28,7 @@ require 'cek.php';
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Tables</title>
+    <title>Dashboard - Susu Murni Nasional</title>
 
     <!-- Custom fonts for this template -->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -47,7 +61,7 @@ require 'cek.php';
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="index.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
@@ -115,11 +129,9 @@ require 'cek.php';
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
                     <!-- Sidebar Toggle (Topbar) -->
-                    <form class="form-inline">
-                        <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                            <i class="fa fa-bars"></i>
-                        </button>
-                    </form>
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
 
                     <!-- Topbar Search -->
                     <form
@@ -163,7 +175,125 @@ require 'cek.php';
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-2 text-gray-800">Dashboard</h1>
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                    </div>
+
+                    <!-- Content Row -->
+                    <div class="row">
+
+                        <!-- Total Products Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Total Produk</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $total_products ?></div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-box fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Users Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Total Pengguna</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?= $total_users ?></div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Stock In Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Total Stok Masuk</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">Rp <?= number_format($total_stock_in, 0, ',', '.') ?></div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-arrow-left fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Stock Out Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Total Stok Keluar</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">Rp <?= number_format($total_stock_out, 0, ',', '.') ?></div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-arrow-right fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Row -->
+                    <div class="row">
+                        <!-- Low Stock Products -->
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Produk dengan Stok Rendah</h6>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Kode Produk</th>
+                                                    <th>Nama Produk</th>
+                                                    <th>Satuan</th>
+                                                    <th>Stok</th>
+                                                    <th>Harga Jual</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php while($row = mysqli_fetch_array($query_low_stock)) { ?>
+                                                <tr>
+                                                    <td><?= $row['kode_barang'] ?></td>
+                                                    <td><?= $row['nama_barang'] ?></td>
+                                                    <td><?= $row['satuan'] ?></td>
+                                                    <td class="text-danger font-weight-bold"><?= $row['stok'] ?></td>
+                                                    <td>Rp <?= number_format($row['harga_jual'], 0, ',', '.') ?></td>
+                                                </tr>
+                                                <?php } ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
                 <!-- /.container-fluid -->
@@ -175,7 +305,7 @@ require 'cek.php';
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Susu Murni Nasional 2025</span>
+                        <span>Copyright &copy; Susu Murni Nasional <?= date('Y') ?></span>
                     </div>
                 </div>
             </footer>
@@ -198,12 +328,12 @@ require 'cek.php';
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Apakah Anda Yakin Ingin Keluar</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body">Klik Logout Untuk Menghapus Session Dan Logout</div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
                     <a class="btn btn-primary" href="logout.php">Logout</a>
