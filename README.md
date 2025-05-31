@@ -4,6 +4,7 @@
 </p>
 
 <h1>Demo Aplikasi</h1>
+<img src="https://raw.githubusercontent.com/InstaCodex/Susu-Murni-Nasional/refs/heads/main/img/Screenshot%202025-05-31%20183730.png" alt="Profile Image" width="100%">
 <img src="https://raw.githubusercontent.com/InstaCodex/Susu-Murni-Nasional/refs/heads/main/img/0.png" alt="Profile Image" width="100%">
 <img src="https://raw.githubusercontent.com/InstaCodex/Susu-Murni-Nasional/refs/heads/main/img/1.png" alt="Profile Image" width="100%">
 <img src="https://raw.githubusercontent.com/InstaCodex/Susu-Murni-Nasional/refs/heads/main/img/2.png" alt="Profile Image" width="100%">
