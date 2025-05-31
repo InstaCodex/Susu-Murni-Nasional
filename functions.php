@@ -83,6 +83,18 @@ if(isset($_POST['addnewprodukkeluar'])) {
     $jumlah = $_POST['jumlah'];
     $harga = $_POST['harga'];
     $total_harga = $jumlah * $harga;
+
+    // Check available stock
+    $check_stock = mysqli_query($koneksi, "SELECT stok FROM barang WHERE id_barang='$id_barang'");
+    $stock_data = mysqli_fetch_array($check_stock);
+    $available_stock = $stock_data['stok'];
+
+    if($jumlah > $available_stock) {
+        $_SESSION['error'] = "Stok tidak mencukupi! Stok tersedia: " . $available_stock;
+        header('Location: stok_keluar.php');
+        exit();
+    }
+
     // Insert ke faktur_keluar
     $insert_faktur = mysqli_query($koneksi, "INSERT INTO faktur_keluar (no_faktur_keluar, tanggal, id_pengguna) VALUES ('$no_faktur_keluar', '$tanggal', '$id_pengguna')");
     $id_faktur_keluar = mysqli_insert_id($koneksi);
@@ -260,6 +272,17 @@ if(isset($_POST['edit_stok_keluar'])) {
     $data_lama = mysqli_fetch_array($query_lama);
     $jumlah_lama = $data_lama['jumlah'];
     $id_barang = $data_lama['id_barang'];
+
+    // Check if new quantity exceeds available stock
+    $check_stock = mysqli_query($koneksi, "SELECT stok FROM barang WHERE id_barang='$id_barang'");
+    $stock_data = mysqli_fetch_array($check_stock);
+    $available_stock = $stock_data['stok'] + $jumlah_lama; // Add back the old quantity since it's being returned
+
+    if($jumlah_baru > $available_stock) {
+        $_SESSION['error'] = "Stok tidak mencukupi! Stok tersedia: " . $available_stock;
+        header('Location: stok_keluar.php');
+        exit();
+    }
 
     // Update detail faktur keluar
     $update_detail = mysqli_query($koneksi, "UPDATE detail_faktur_keluar SET jumlah='$jumlah_baru', harga='$harga_baru', total_harga='$total_harga_baru' WHERE id_detail='$id_detail'");
