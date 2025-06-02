@@ -1,16 +1,20 @@
 <?php
 require 'functions.php';
-//Cek Login Dulu Bro
+
+// Proses Login
 if(isset($_POST['login'])) {
     $nama_pengguna = $_POST['nama_pengguna'];
     $kata_sandi = $_POST['kata_sandi'];
 
-    // Cek ke tabel pengguna
+    // Cek kredensial di database
     $cek_database = mysqli_query($koneksi, "SELECT * FROM pengguna WHERE nama_pengguna='$nama_pengguna'");
     $hitung = mysqli_num_rows($cek_database);
+    
     if($hitung>0) {
         $data = mysqli_fetch_assoc($cek_database);
+        // Verifikasi password
         if(password_verify($kata_sandi, $data['kata_sandi'])) {
+            // Set session untuk user yang berhasil login
             $_SESSION['log'] = 'True';
             $_SESSION['id_pengguna'] = $data['id_pengguna'];
             $_SESSION['nama_pengguna'] = $data['nama_pengguna'];
@@ -24,6 +28,7 @@ if(isset($_POST['login'])) {
     }
 }
 
+// Redirect ke index jika sudah login
 if(!isset($_SESSION['log'])) {
 
 } else {

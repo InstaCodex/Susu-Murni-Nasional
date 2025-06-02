@@ -234,7 +234,7 @@ require 'cek.php';
                                                             <input type="text" name="satuan" value="<?=$satuan;?>" class="form-control" required><br>
                                                             <input type="number" name="harga_beli" value="<?=$harga_beli;?>" class="form-control" required><br>
                                                             <input type="number" name="harga_jual" value="<?=$harga_jual;?>" class="form-control" required><br>
-                                                            <input type="number" name="stok" value="<?=$stok;?>" class="form-control" disabled>
+                                                            <input type="number" name="stok" value="<?=$stok;?>" class="form-control" readonly>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="submit" name="updateproduk" class="btn btn-primary">Submit</button>

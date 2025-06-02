@@ -349,7 +349,10 @@ require 'cek.php';
                 </div>
                 <form action="functions.php" method="post">
                     <div class="modal-body">
-                        <input type="text" name="no_faktur_keluar" placeholder="No Faktur Keluar" class="form-control" required><br>
+                        <?php 
+                        $no_faktur_keluar = generateInvoiceNumber('INV-K-');
+                        ?>
+                        <input type="text" name="no_faktur_keluar" value="<?= $no_faktur_keluar; ?>" class="form-control" readonly><br>
                         <input type="date" name="tanggal" class="form-control" required><br>
                         <select name="id_barang" class="form-control" required>
                             <option value="">Pilih Produk</option>

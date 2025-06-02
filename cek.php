@@ -1,8 +1,9 @@
 <?php
-//jika belum login
+// Cek apakah user sudah login
 if(isset($_SESSION['log'])) {
-     
+    // User sudah login, biarkan akses
 } else {
-     header('location:login.php');
+    // User belum login, redirect ke halaman login
+    header('location:login.php');
 }
 ?>

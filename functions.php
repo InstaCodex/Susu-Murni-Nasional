@@ -1,13 +1,20 @@
 <?php 
 session_start();
 
-// Koneksi ke database baru
+// Koneksi ke database
 $koneksi = mysqli_connect("localhost","root","","sbd");
 // if ($koneksi) {
 //     echo 'berhasil konek';
 // }
 
-// Tambah Barang Baru
+// kanggo gawe no faktur acak
+function generateInvoiceNumber($prefix) {
+    $date = date('Ymd');
+    $random = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
+    return $prefix . $date . $random;
+}
+
+// Fungsi untuk menambah produk baru
 if(isset($_POST['addnewproduk'])) {
     $kode_barang = $_POST['kode_barang'];
     $nama_barang = $_POST['nama_barang'];
@@ -16,13 +23,14 @@ if(isset($_POST['addnewproduk'])) {
     $harga_jual = $_POST['harga_jual'];
     $stok = $_POST['stok'];
 
-    // Check if product code already exists
+    // Cek apakah kode produk sudah ada
     $check_kode = mysqli_query($koneksi, "SELECT * FROM barang WHERE kode_barang='$kode_barang'");
     if(mysqli_num_rows($check_kode) > 0) {
         $_SESSION['error'] = "Kode produk sudah digunakan!";
         header('Location: tambah_produk.php'); exit();
     }
     
+    // Tambahkan produk baru ke database
     $addtotable = mysqli_query($koneksi, "INSERT INTO barang (kode_barang, nama_barang, satuan, harga_beli, harga_jual, stok) VALUES ('$kode_barang', '$nama_barang', '$satuan', '$harga_beli', '$harga_jual', '$stok')");
     if($addtotable) {
         $_SESSION['success'] = "Produk berhasil ditambahkan!";
@@ -33,7 +41,7 @@ if(isset($_POST['addnewproduk'])) {
     }
 }
 
-// Update Barang
+// Fungsi untuk update produk
 if(isset($_POST['updateproduk'])) {
     $id_barang = $_POST['id_barang'];
     $kode_barang = $_POST['kode_barang'];
@@ -46,14 +54,14 @@ if(isset($_POST['updateproduk'])) {
     header('Location:tambah_produk.php');
 }
 
-// Hapus Barang
+// Fungsi untuk hapus produk
 if(isset($_POST['hapusproduk'])) {
     $id_barang = $_POST['id_barang'];
     $hapus = mysqli_query($koneksi,"DELETE FROM barang WHERE id_barang='$id_barang'");
     header('Location:tambah_produk.php');
 }
 
-// Tambah Stok Masuk
+// Fungsi untuk menambah stok masuk
 if(isset($_POST['addnewprodukmasuk'])) {
     $no_faktur = $_POST['no_faktur'];
     $tanggal = $_POST['tanggal'];
@@ -63,17 +71,20 @@ if(isset($_POST['addnewprodukmasuk'])) {
     $jumlah = $_POST['jumlah'];
     $harga = $_POST['harga'];
     $total_harga = $jumlah * $harga;
-    // Insert ke faktur_masuk
+    
+    // Insert ke tabel faktur_masuk
     $insert_faktur = mysqli_query($koneksi, "INSERT INTO faktur_masuk (no_faktur, tanggal, id_pengguna) VALUES ('$no_faktur', '$tanggal', '$id_pengguna')");
     $id_faktur_masuk = mysqli_insert_id($koneksi);
-    // Insert ke detail
+    
+    // Insert ke tabel detail_faktur_masuk
     $insert_detail = mysqli_query($koneksi, "INSERT INTO detail_faktur_masuk (id_faktur_masuk, id_barang, satuan, jumlah, harga, total_harga) VALUES ('$id_faktur_masuk', '$id_barang', '$satuan', '$jumlah', '$harga', '$total_harga')");
+    
     // Update stok barang
     mysqli_query($koneksi, "UPDATE barang SET stok = stok + $jumlah WHERE id_barang='$id_barang'");
     header('Location: stok_masuk.php');
 }
 
-// Tambah Stok Keluar
+// Fungsi untuk menambah stok keluar
 if(isset($_POST['addnewprodukkeluar'])) {
     $no_faktur_keluar = $_POST['no_faktur_keluar'];
     $tanggal = $_POST['tanggal'];
@@ -84,22 +95,25 @@ if(isset($_POST['addnewprodukkeluar'])) {
     $harga = $_POST['harga'];
     $total_harga = $jumlah * $harga;
 
-    // Check available stock
+    // Cek stok yang tersedia
     $check_stock = mysqli_query($koneksi, "SELECT stok FROM barang WHERE id_barang='$id_barang'");
     $stock_data = mysqli_fetch_array($check_stock);
     $available_stock = $stock_data['stok'];
 
+    // Validasi stok
     if($jumlah > $available_stock) {
         $_SESSION['error'] = "Stok tidak mencukupi! Stok tersedia: " . $available_stock;
         header('Location: stok_keluar.php');
         exit();
     }
 
-    // Insert ke faktur_keluar
+    // Insert ke tabel faktur_keluar
     $insert_faktur = mysqli_query($koneksi, "INSERT INTO faktur_keluar (no_faktur_keluar, tanggal, id_pengguna) VALUES ('$no_faktur_keluar', '$tanggal', '$id_pengguna')");
     $id_faktur_keluar = mysqli_insert_id($koneksi);
-    // Insert ke detail
+    
+    // Insert ke tabel detail_faktur_keluar
     $insert_detail = mysqli_query($koneksi, "INSERT INTO detail_faktur_keluar (id_faktur_keluar, id_barang, satuan, jumlah, harga, total_harga) VALUES ('$id_faktur_keluar', '$id_barang', '$satuan', '$jumlah', '$harga', '$total_harga')");
+    
     // Update stok barang
     mysqli_query($koneksi, "UPDATE barang SET stok = stok - $jumlah WHERE id_barang='$id_barang'");
     header('Location: stok_keluar.php');
@@ -154,19 +168,20 @@ if(isset($_POST['hapusrekapmasuk'])) {
     header('Location: rekap_faktur_masuk.php');
 }
 
-// Tambah Pengguna Baru
+// Fungsi untuk menambah pengguna baru
 if(isset($_POST['addnewpengguna'])) {
     $nama_pengguna = $_POST['nama_pengguna'];
     $kata_sandi = password_hash($_POST['kata_sandi'], PASSWORD_DEFAULT);
     $peran = $_POST['peran'];
     
-    // Check if username already exists
+    // Cek apakah username sudah ada
     $check_username = mysqli_query($koneksi, "SELECT * FROM pengguna WHERE nama_pengguna='$nama_pengguna'");
     if(mysqli_num_rows($check_username) > 0) {
         $_SESSION['error'] = "Nama pengguna sudah digunakan!";
         header('Location: pengguna.php'); exit();
     }
     
+    // Tambahkan pengguna baru ke database
     $addtotable = mysqli_query($koneksi, "INSERT INTO pengguna (nama_pengguna, kata_sandi, peran) VALUES ('$nama_pengguna', '$kata_sandi', '$peran')");
     if($addtotable) {
         $_SESSION['success'] = "Pengguna berhasil ditambahkan!";
@@ -177,12 +192,13 @@ if(isset($_POST['addnewpengguna'])) {
     }
 }
 
-// Update Pengguna
+// Fungsi untuk update pengguna
 if(isset($_POST['updatepengguna'])) {
     $id_pengguna = $_POST['id_pengguna'];
     $nama_pengguna = $_POST['nama_pengguna'];
     $peran = $_POST['peran'];
     
+    // Update password jika diisi
     if(!empty($_POST['kata_sandi'])) {
         $kata_sandi = password_hash($_POST['kata_sandi'], PASSWORD_DEFAULT);
         $update = mysqli_query($koneksi, "UPDATE pengguna SET nama_pengguna='$nama_pengguna', kata_sandi='$kata_sandi', peran='$peran' WHERE id_pengguna='$id_pengguna'");
